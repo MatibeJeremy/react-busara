@@ -91,7 +91,7 @@ function Questions(){
     }
 
     useEffect( ()=>{
-        const url = "http://fullstack-role.busara.io/api/v1/recruitment/forms/?node_type=Both";
+        const url = "https://fullstack-role.busara.io/api/v1/recruitment/forms/?node_type=Both";
 
         axios.get(url,{
             headers:{
@@ -153,7 +153,6 @@ function Questions(){
                 <div className="card-body">
                 <button className="btn btn-success">Submit Answers</button>
                 </div>
-            }
         </div>
     )
 }
