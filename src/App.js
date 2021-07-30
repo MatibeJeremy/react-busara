@@ -5,22 +5,6 @@ import Form from "./Components/Form";
 import Home from "./Components/Home";
 import Questions from "./Components/Questions";
 function App() {
-    // const RedirectToLogin = ({ component: Component, ...rest }) => {
-    //     return (
-    //         <Route
-    //             {...rest}
-    //             render={props =>
-    //                 localStorage.getItem('access_token') ? (
-    //                     <App>
-    //                         <Component {...props} />
-    //                     </App>
-    //                 ) : (
-    //                     console.log("You are not authorized"),
-    //                     <Redirect to="/login" />
-    //                 )}
-    //         />
-    //     );
-    // };
   return (
       <Router basename={`/`}>
     <div className="App">

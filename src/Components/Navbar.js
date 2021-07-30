@@ -1,6 +1,4 @@
 import './styles.css';
-import qs from "qs";
-import axios from "axios";
 function Navbar(){
     const handleLogout = (evt) => {
         evt.preventDefault();
