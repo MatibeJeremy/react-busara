@@ -72,7 +72,7 @@ function Form() {
                             <input
                                 type="text"
                                 className="form-control"
-                                placeholder="Username"
+                                placeholder="matibealloys@gmail.com"
                                 aria-label="Username"
                                 value={username}
                                 onChange={e => setUsername(e.target.value)}
@@ -85,7 +85,7 @@ function Form() {
                             <input
                                 type="password"
                                 className="form-control"
-                                placeholder="Password"
+                                placeholder="jeremyalloys45"
                                 value={password}
                                 onChange={e => setPassword(e.target.value)}
                                 aria-label="password"
