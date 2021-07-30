@@ -7,7 +7,7 @@ function Home(){
     const [user,setUser] = useState([]);
 
     useEffect( ()=>{
-        const url = "http://fullstack-role.busara.io/api/v1/users/current-user";
+        const url = "https://fullstack-role.busara.io/api/v1/users/current-user";
 
         axios.get(url,{
             headers:{
