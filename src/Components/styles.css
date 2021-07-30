@@ -1,0 +1,14 @@
+#logo{
+    padding: 0px;
+    margin:0px;
+}
+#card{
+    margin-left:20%;
+    margin-right: 20%;
+    margin-top:5%;
+    float:none;
+    border-radius: 20px;
+}
+#form{
+    padding:20px;
+}
