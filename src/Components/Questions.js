@@ -1,17 +1,47 @@
 import React, {useEffect, useRef, useState} from "react";
 import axios from "axios";
+import moment from "moment";
+import {Alert, Breadcrumbs, Card, Chip, emphasize, SnackbarContent, TextField} from "@material-ui/core";
+import HomeIcon from "@material-ui/icons/Home";
+import {styled} from "@material-ui/core/styles";
+import {useHistory} from "react-router-dom";
 
 function Questions() {
     const [result, setResult] = useState([]);
     const [q_id, setQ] = useState('');
     const [q_ans, setQans] = useState('');
     const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(null);
-    const [time, setTime] = useState(Date().toLocaleString())
+    const [loading, setLoading] = useState(false);
+    const [time, setTime] = useState(moment().format())
     const form = useRef(null);
+    const [success, setSuccess] = useState(false);
+    const [error, setError] = useState(false);
+    const [q_error, setQerror] = useState(false);
+    let history = useHistory();
+
+    const StyledBreadcrumb = styled(Chip)(({theme}) => {
+        const backgroundColor =
+            theme.palette.mode === 'light'
+                ? theme.palette.grey[100]
+                : theme.palette.grey[800];
+        return {
+            backgroundColor,
+            height: theme.spacing(3),
+            color: theme.palette.text.primary,
+            fontWeight: theme.typography.fontWeightRegular,
+            '&:hover, &:focus': {
+                backgroundColor: emphasize(backgroundColor, 0.06),
+            },
+            '&:active': {
+                boxShadow: theme.shadows[1],
+                backgroundColor: emphasize(backgroundColor, 0.12),
+            },
+        };
+    });
 
     const handleSubmit = (evt) => {
-        setLoading(true);
+        setQerror(true);
+        setTimeout(() => { setQerror(false); }, 2000);
         evt.preventDefault();
         const data = [
             {
@@ -70,17 +100,17 @@ function Questions() {
                     }
                 ],
                 "user": user.id,
-                "survey_id": "",
-                "end_time": Date().toLocaleString()
+                "survey_id": "2",
+                "end_time": moment().format()
             }
-        ]
+        ];
+
 
         const url = "http://fullstack-role.busara.io/api/v1/recruitment/answers/submit/";
 
         const options = {
             method: 'POST',
             headers: {
-                'content-type': 'application/x-www-form-urlencoded',
                 'Authorization': `Bearer ${localStorage.getItem('access_token')}`
             },
             'HTTP_VERSIONCODE': 200,
@@ -93,12 +123,12 @@ function Questions() {
             .then((response) => {
                 console.log(response)
             }).catch((error) => {
-            setLoading(false);
             console.log(error);
         });
     }
 
     useEffect(() => {
+        setLoading(true);
         const url = "https://fullstack-role.busara.io/api/v1/recruitment/forms/?node_type=Both";
 
         axios.get(url, {
@@ -109,7 +139,12 @@ function Questions() {
             .then((response) => {
                 setResult(response.data.forms[0].pages);
                 console.log(response.data);
+                setLoading(false);
+                setSuccess(true);
+                setTimeout(() => { setSuccess(false); }, 2000);
             }).catch((error) => {
+            setLoading(false);
+            setError(true);
             console.log(error);
         });
     }, []);
@@ -131,50 +166,69 @@ function Questions() {
     }, []);
 
     let loading2;
+    let successMes;
+    let errorMes;
+    let qErrorMes;
     if (loading) {
-        loading2 = <p>Loading...</p>
+        loading2 = <p style={{color:"white",marginLeft:"40%",marginRight:"40%",marginTop:"20px"}}>Loading...</p>
+    }
+    if(success){
+        successMes = <Alert sx={{margin:"10px"}} severity="success">All Questions Loaded Successfully!</Alert>
+    }
+    if(error){
+        errorMes = <Alert sx={{margin:"10px"}} severity="error">There was an error. Check your internet!</Alert>
+    }
+    if(q_error){
+        qErrorMes = <Alert sx={{margin:"10px"}} severity="error">Object Mapping Pending!</Alert>
     }
 
 
     return (
         <div>
+            <Breadcrumbs aria-label="breadcrumb" style={{marginLeft: "10%", marginTop: "20px"}}>
+                <StyledBreadcrumb
+                    component="a"
+                    onClick={() => {
+                        history.push('/home')
+                    }}
+                    label="Home"
+                    icon={<HomeIcon fontSize="small"/>}
+                />
+                <StyledBreadcrumb component="a" onClick={() => {
+                    history.push('/questions')
+                }} label="Questions"/>
+            </Breadcrumbs>
+            {loading2}{successMes}{errorMes}
             {
                 result.map(pObj => {
                     return ([
-                        <div className="card" style={{width: "18px;"}}>
-                            <div className="card-body">
-                                <h5 key={pObj.id} className="card-title" tyle={{padding: "18rem;"}}>Page: {pObj.id}(Insert
-                                    All Details)</h5>
-                            </div>
-                        </div>,
+                        <h5 key={pObj.id} className="card-title"
+                            style={{padding: "10px", marginLeft: "35%", color: "white"}}>Page: {pObj.id}(Insert
+                            All Details)</h5>,
                         pObj.sections.map(qObj => {
                             return ([
                                 <h5 key={qObj.id} className="card-title"
-                                    style={{padding: "10px", marginLeft: "40%", color: "white"}}>Section
+                                    style={{padding: "10px", marginLeft: "35%", color: "white"}}>Section
                                     - {qObj.description}</h5>,
                                 qObj.questions.map(rObj => {
                                     return ([
-                                        <div className="card" id="card">
+                                        <Card sx={{maxWidth: 345, margin: "auto", marginBottom: "5px"}}>
                                             <div id="form">
-                                                {loading2}
                                                 <form ref={form} onSubmit={handleSubmit}>
                                                     <div className="input-group mb-3">
-                                                        <label style={{padding: "10px"}} className="form-label"
-                                                               key={rObj.id}>{rObj.description || rObj.column_match}</label>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
+                                                        <TextField
+                                                            id="filled-basic"
                                                             placeholder={rObj.description || rObj.column_match}
-                                                            aria-label="Username"
+                                                            label={rObj.description || rObj.column_match}
+                                                            style={{margin: "auto", width: "500px"}}
+                                                            variant="outlined"
                                                             value={q_ans}
-                                                            onChange={e => setQans(e.target.value)}
-                                                            aria-describedby="basic-addon1"
-                                                            required/>
+                                                            onChange={e => setQans(e.target.value)}/>
                                                     </div>
                                                 </form>
                                             </div>
 
-                                        </div>
+                                        </Card>
                                     ])
                                 })
                             ])
@@ -182,9 +236,10 @@ function Questions() {
                     ])
                 })
             }
+            {qErrorMes}
 
             <div className="card-body">
-                <button onClick={handleSubmit} className="btn btn-success">Submit Answers</button>
+                <button onClick={handleSubmit} className="btn btn-primary">Submit Answers</button>
             </div>
         </div>
     )

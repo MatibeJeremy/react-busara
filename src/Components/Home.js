@@ -2,10 +2,77 @@ import './styles.css';
 import {useEffect, useState} from "react";
 import {useHistory} from "react-router-dom";
 import axios from "axios";
+import HomeIcon from '@material-ui/icons/Home';
+import {useDispatch} from "react-redux";
+import NavigationIcon from '@material-ui/icons/Navigation';
+import {
+    Alert,
+    Avatar,
+    Badge,
+    Breadcrumbs,
+    Card, Chip, emphasize, Fab,
+    List,
+    ListItem,
+    ListItemAvatar,
+    ListItemText, SnackbarContent,
+    Typography
+} from "@material-ui/core";
+import { styled } from '@material-ui/core/styles';
+import LocationOnIcon from '@material-ui/icons/LocationOn';
+
+const StyledBreadcrumb = styled(Chip)(({ theme }) => {
+    const backgroundColor =
+        theme.palette.mode === 'light'
+            ? theme.palette.grey[100]
+            : theme.palette.grey[800];
+    return {
+        backgroundColor,
+        height: theme.spacing(3),
+        color: theme.palette.text.primary,
+        fontWeight: theme.typography.fontWeightRegular,
+        '&:hover, &:focus': {
+            backgroundColor: emphasize(backgroundColor, 0.06),
+        },
+        '&:active': {
+            boxShadow: theme.shadows[1],
+            backgroundColor: emphasize(backgroundColor, 0.12),
+        },
+    };
+});
 
 function Home() {
     let history = useHistory();
     const [user, setUser] = useState([]);
+    const [success, setSuccess] = useState(false);
+    const [error, setError] = useState(false);
+    const StyledBadge = styled(Badge)(({ theme }) => ({
+        '& .MuiBadge-badge': {
+            backgroundColor: '#44b700',
+            color: '#44b700',
+            boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+            '&::after': {
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                borderRadius: '50%',
+                animation: 'ripple 1.2s infinite ease-in-out',
+                border: '1px solid currentColor',
+                content: '""',
+            },
+        },
+        '@keyframes ripple': {
+            '0%': {
+                transform: 'scale(.8)',
+                opacity: 1,
+            },
+            '100%': {
+                transform: 'scale(2.4)',
+                opacity: 0,
+            },
+        },
+    }));
 
     useEffect(() => {
         const url = "https://fullstack-role.busara.io/api/v1/users/current-user";
@@ -16,37 +83,92 @@ function Home() {
             }
         })
             .then((response) => {
-                console.log(response.data);
                 setUser(response.data);
-                console.log(user);
+                setSuccess(true);
+                setTimeout(() => { setSuccess(false); }, 3000);
+                console.log(response.status);
+
             }).catch((error) => {
-            console.log(error);
+                setError(true);
+                setTimeout(() => { setError(false); }, 3000);
+                if(error.response.status === 401){
+                    history.push('/login');
+                }else{
+                    history.push('/login');
+                }
+                console.log(error.response.status);
         });
     }, []);
 
-    useEffect(() => {
-        console.log(user);
-    })
+    let successMes;
+    let errorMes;
+    if(success){
+        successMes = <SnackbarContent
+            message={
+                'All User Details Loaded Successfully'
+            }
+        />
+    }
+    if(error){
+        errorMes = <SnackbarContent
+            message={
+                'There was an error. You need to log in!'
+            }
+        />
+    }
     return (
         <div>
-            <div className="card" id="card">
-                <svg className="card-img-top" xmlns="http://www.w3.org/2000/svg" width="150" height="150"
-                     fill="currentColor"
-                     className="bi bi-person" viewBox="0 0 16 16">
-                    <path
-                        d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
-                </svg>
+            {successMes}{errorMes}
+            <Breadcrumbs aria-label="breadcrumb" style={{marginLeft:"10%",marginTop:"20px"}}>
+                <StyledBreadcrumb
+                    component="a"
+                    onClick={() => {
+                        history.push('/home')
+                    }}
+                    label="Home"
+                    icon={<HomeIcon fontSize="small" />}
+                />
+                <StyledBreadcrumb component="a" onClick={() => {
+                    history.push('/questions')
+                }} label="Questions" />
+            </Breadcrumbs>
+            <Card sx={{ maxWidth: 500, margin:"auto", marginTop:"3%", borderRadius:"20px" }}>
+                <StyledBadge
+                    overlap="circular"
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                    variant="dot"
+                    style={{marginLeft:"46%",marginTop:"20px"}}
+                >
+                    <Avatar alt={user.name || '...'}  />
+                </StyledBadge>
                 <div className="card-body">
-                    <h5 className="card-title">User Details</h5>
-                    <p className="card-text">Name: {user.name || 'Loading...'}</p>
-                    <p className="card-text">Email: {user.email || 'Loading...'}</p>
-                    <p className="card-text">Phone Number: {user.phone_number || 'Loading...'}</p>
-                    <button onClick={() => {
-                        history.push('/questions')
-                    }} className="btn btn-primary">Questions
-                    </button>
+                    <Typography gutterBottom sx={{margin:"auto"}} variant="h5" component="div">
+                        User Details
+                    </Typography>
+
                 </div>
-            </div>
+
+                <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}>
+                    <ListItem>
+                        <ListItemText primary="Name" secondary={user.name || 'Loading...'} />
+                    </ListItem>
+                    <ListItem>
+                        <ListItemText primary="Email" secondary={user.email || 'Loading...'} />
+                    </ListItem>
+                    <ListItem>
+
+                        <ListItemText primary="Phone Number" secondary={user.phone_number || 'Loading...'} />
+                    </ListItem>
+                    <ListItem>
+                        <ListItemAvatar>
+                            <Avatar>
+                                <LocationOnIcon />
+                            </Avatar>
+                        </ListItemAvatar>
+                        <ListItemText primary="Universe Name" secondary={user.universe_name || 'Loading...'} />
+                    </ListItem>
+                </List>
+            </Card>
         </div>
     )
 }
